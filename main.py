@@ -1,16 +1,18 @@
 import csv
+from collections import Counter
 
+counter = -1  # счётчик записей
+long_name_counter = 0  # счётчик записей с названиями больше 30 символов
+search_counter = 0  # счётчик записей для функции поиска
+search_results = []  # массив, в который добавляются найденные записи
+refs = []  # массив, в который добавляются библиографические ссылки
+tags = []  # массив, в который добавляются теги для допзадания
+row_tags = []  # массив с тегами текущей строки(до проверки на повторы и занесения в общий массив)
+names = []  # массив с названиями книг для допзадания
+print("\t\tПоиск книги по автору")
+author_name = input("Введите имя автора: ")
 with open("books.csv", "r", encoding='windows-1251') as file:
     reader = csv.reader(file, delimiter=";")
-    counter = -1  # счётчик записей
-    long_name_counter = 0  # счётчик записей с названиями больше 30 символов
-    search_counter = 0  # счётчик записей для функции поиска
-    search_results = []  # массив, в который добавляются найденные записи
-    refs = []  # массив, в который добавляются библиографические ссылки
-    tags = []  # массив, в который добавляются теги для допзадания
-    row_tags = []  # массив с тегами текущей строки(до проверки на повторы и занесения в общий массив)
-    print("\t\tПоиск книги по автору")
-    author_name = input("Введите имя автора: ")
     for row in reader:
         row_text = []  # массив с содержанием текущий строки, разбитой по разделителям
         for i in row:
@@ -28,11 +30,16 @@ with open("books.csv", "r", encoding='windows-1251') as file:
             for i in row_tags:
                 if i not in tags:
                     tags.append(i)
+            names.append(row_text[1])
         counter += 1
     with open("refs.txt", "w") as refs_file:
         refs_file.write("\n".join(refs))
 with open("tags.txt", "w") as tags_file:
     tags_file.writelines(f"# {tag}\n" for tag in tags)
+with open("top_20.txt", "w") as top_file:
+    top = Counter(names).most_common(20)
+    for i in range(20):
+        top_file.write(f"{i+1}: {top[i][0]}\n")
 if search_counter == 0:
     print("Не было найдено ни одной книги с данным автором")
 else:
